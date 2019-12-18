@@ -1,6 +1,9 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
 
+    # utility packages
+    choco install dos2unix -y
+
     # download and install ubuntu 18.04 with Chocolatey
     choco install wsl-ubuntu-1804 -y
 }
@@ -83,6 +86,13 @@ function Get-Choco-Path {
 	$choco_path = (get-command choco | Select-Object -ExpandProperty Definition)
 	$choco_path = $choco_path.split("\\") | Where-Object { $_ -ne "choco.exe" -And $_ -ne "bin" }
 	return $choco_path -join "\"
+}
+
+function Create-Shortcut($source_exe, $dest_link) {
+	$WScriptShell = New-Object -ComObject WScript.Shell
+	$Shortcut = $WScriptShell.CreateShortcut($dest_link)
+	$Shortcut.TargetPath = $source_exe
+	$Shortcut.Save()
 }
 
 Setup-Prerequisites
