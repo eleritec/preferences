@@ -1,0 +1,12 @@
+
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>eleritec.ubuntu-1804</id>
+    <version>1.0.0</version>
+    <authors>eleritec</authors>
+    <owners>eleritec</owners>
+    <description>Installs Ubuntu 18.04 on the current system under WSL and configures the default user to match the currently active Windows user.</description>
+    <tags>Boxstarter</tags>
+  </metadata>
+</package>
