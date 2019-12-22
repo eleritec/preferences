@@ -107,7 +107,7 @@ function Get-Choco-Path {
     # note, don't call 'Get-Command choco' to obtain the location of the choco executable.
     # if running under boxstarter, calls to choco are intercepted and will result in garbled output.
     # instead, parse the $env:path to obtain our chocolatey path
-	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey*' })
+	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey\bin' })
 	$choco_path = $choco_path.split("\\") | Where-Object { $_ -ne "choco.exe" -And $_ -ne "bin" }
 	return $choco_path -join "\"
 }
