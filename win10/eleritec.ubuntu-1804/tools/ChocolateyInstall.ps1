@@ -1,5 +1,6 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
+    choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
 
     # utility packages
     choco install dos2unix -y
@@ -17,11 +18,9 @@ function Configure-User {
         # calling `wsl -d Ubuntu-18.04 adduser` chokes on --geocos for some reason, 
 		# so instead we'll dump the creation to a bash script that we can execute as root
 		$pw_params = $env:username + ':password'
-		echo "#!/bin/bash" > _user_init.sh
-		echo "adduser --disabled-password --gecos '' $env:username" >> _user_init.sh
-		echo "echo '$pw_params' | chpasswd" >> user_init.sh
-		$script_text = Get-Content _user_init.sh
-		echo $script_text | out-file -encoding ASCII _user_init.sh
+		Out-File -InputObject "#!/bin/bash" -Encoding "ASCII" -FilePath _user_init.sh
+		Out-File -InputObject "adduser --disabled-password --gecos '' $env:username" -Encoding "ASCII"  -FilePath _user_init.sh -Append
+		Out-File -InputObject "echo '$pw_params' | chpasswd" -Encoding "ASCII" -FilePath _user_init.sh -Append
 		dos2unix _user_init.sh
 		wsl -d $distro chmod 744 ./_user_init.sh
 		wsl -d $distro ./_user_init.sh
