@@ -1,12 +1,35 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
-    choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
+    if(-Not (Is-WSL-Enabled)) {
+        #choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
+        echo "installing WSL"
+    }
 
     # utility packages
-    choco install dos2unix -y
+    #choco install dos2unix -y
 
     # download and install ubuntu 18.04 with Chocolatey
-    choco install wsl-ubuntu-1804 -y
+    #choco install wsl-ubuntu-1804 -y
+}
+
+function Validate-Environment {
+    # make sure we're running Win10 build 14393 or greater
+    $os = [Environment]::OSVersion.Version
+    if(-Not (($os.Major -ge 10) -And ($os.Build -ge 14393))) {
+        return $false
+    }
+
+    # ensure we're running with admin privileges
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Is-WSL-Enabled {
+    $feature = (Get-WindowsOptionalFeature -Online -FeatureName  Microsoft-Windows-Subsystem-Linux)
+    if([String]::IsNullOrEmpty($feature)) {
+        return $false
+    }
+    return $feature.State -eq "Enabled"
 }
 
 function Configure-User {
@@ -97,7 +120,9 @@ function Create-Shortcut($source_exe, $dest_link) {
 	$Shortcut.Save()
 }
 
-Setup-Prerequisites
-Configure-User
-Configure-Host-Permissions
-Configure-Shortcuts
+if(Validate-Environment) {
+    Setup-Prerequisites
+    #Configure-User
+    #Configure-Host-Permissions
+    #Configure-Shortcuts
+}
