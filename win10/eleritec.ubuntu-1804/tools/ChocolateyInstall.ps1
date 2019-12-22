@@ -84,7 +84,7 @@ function Get-Ubuntu-Path {
 }
 
 function Get-Choco-Path {
-	$choco_path = (get-command choco | Select-Object -ExpandProperty Definition)
+	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey*' })
 	$choco_path = $choco_path.split("\\") | Where-Object { $_ -ne "choco.exe" -And $_ -ne "bin" }
 	return $choco_path -join "\"
 }
