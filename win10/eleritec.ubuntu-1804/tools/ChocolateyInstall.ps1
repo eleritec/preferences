@@ -44,7 +44,6 @@ function Configure-User {
     $default_user = wsl -d $distro whoami
     if($default_user -eq 'root') {
         $ubuntu_path = Get-Ubuntu-Path
-        Write-Output "Ubuntu-Path: $ubuntu_path"
 		if(-Not ($env:path -like '*wsl-ubuntu-1804*')) {
 			$env:path += ";$ubuntu_path"
 		}	
@@ -59,7 +58,6 @@ function Configure-Host-Permissions {
     Write-Output "Setting up Windows Host filesystem access ..."
     $self = [Security.Principal.WindowsIdentity]::GetCurrent().Name
     $ubuntu_path = Get-Ubuntu-Path
-    Write-Output "Ubuntu-Path: $ubuntu_path"
 	$acl = Get-Acl $ubuntu_path
 	$AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($self, "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")
 	$acl.SetAccessRule($AccessRule)
@@ -84,6 +82,9 @@ function Get-Ubuntu-Path {
 }
 
 function Get-Choco-Path {
+    # note, don't call 'Get-Command choco' to obtain the location of the choco executable.
+    # if running under boxstarter, calls to choco are intercepted and will result in garbled output.
+    # instead, parse the $env:path to obtain our chocolatey path
 	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey*' })
 	$choco_path = $choco_path.split("\\") | Where-Object { $_ -ne "choco.exe" -And $_ -ne "bin" }
 	return $choco_path -join "\"
