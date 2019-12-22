@@ -44,6 +44,7 @@ function Configure-User {
     $default_user = wsl -d $distro whoami
     if($default_user -eq 'root') {
         $ubuntu_path = Get-Ubuntu-Path
+        Write-Output "Ubuntu-Path: $ubuntu_path"
 		if(-Not ($env:path -like '*wsl-ubuntu-1804*')) {
 			$env:path += ";$ubuntu_path"
 		}	
@@ -58,6 +59,7 @@ function Configure-Host-Permissions {
     Write-Output "Setting up Windows Host filesystem access ..."
     $self = [Security.Principal.WindowsIdentity]::GetCurrent().Name
     $ubuntu_path = Get-Ubuntu-Path
+    Write-Output "Ubuntu-Path: $ubuntu_path"
 	$acl = Get-Acl $ubuntu_path
 	$AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($self, "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")
 	$acl.SetAccessRule($AccessRule)
