@@ -1,15 +1,14 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
     if(-Not (Is-WSL-Enabled)) {
-        #choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
-        echo "installing WSL"
+        choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
     }
 
     # utility packages
-    #choco install dos2unix -y
+    choco install dos2unix -y
 
     # download and install ubuntu 18.04 with Chocolatey
-    #choco install wsl-ubuntu-1804 -y
+    choco install wsl-ubuntu-1804 -y
 }
 
 function Validate-Environment {
@@ -122,7 +121,7 @@ function Create-Shortcut($source_exe, $dest_link) {
 
 if(Validate-Environment) {
     Setup-Prerequisites
-    #Configure-User
-    #Configure-Host-Permissions
-    #Configure-Shortcuts
+    Configure-User
+    Configure-Host-Permissions
+    Configure-Shortcuts
 }
