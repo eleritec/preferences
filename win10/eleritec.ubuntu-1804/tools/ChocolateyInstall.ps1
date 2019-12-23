@@ -1,12 +1,38 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
-    choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
+    if(-Not (Is-WSL-Enabled)) {
+        Enable-WindowsOptionalFeature -Online -FeatureName  Microsoft-Windows-Subsystem-Linux -NoRestart |Out-Null
+        if (Test-PendingReboot) {
+            $Boxstarter.RebootOk=$true
+            Invoke-Reboot
+        }
+    }
 
     # utility packages
     choco install dos2unix -y
 
     # download and install ubuntu 18.04 with Chocolatey
     choco install wsl-ubuntu-1804 -y
+}
+
+function Validate-Environment {
+    # make sure we're running Win10 build 14393 or greater
+    $os = [Environment]::OSVersion.Version
+    if(-Not (($os.Major -ge 10) -And ($os.Build -ge 14393))) {
+        return $false
+    }
+
+    # ensure we're running with admin privileges
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Is-WSL-Enabled {
+    $feature = (Get-WindowsOptionalFeature -Online -FeatureName  Microsoft-Windows-Subsystem-Linux)
+    if([String]::IsNullOrEmpty($feature)) {
+        return $false
+    }
+    return $feature.State -eq "Enabled"
 }
 
 function Configure-User {
@@ -85,7 +111,7 @@ function Get-Choco-Path {
     # note, don't call 'Get-Command choco' to obtain the location of the choco executable.
     # if running under boxstarter, calls to choco are intercepted and will result in garbled output.
     # instead, parse the $env:path to obtain our chocolatey path
-	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey*' })
+	$choco_path = ($env:Path -split ';' | Where-Object { $_ -like '*chocolatey\bin' })
 	$choco_path = $choco_path.split("\\") | Where-Object { $_ -ne "choco.exe" -And $_ -ne "bin" }
 	return $choco_path -join "\"
 }
@@ -97,7 +123,9 @@ function Create-Shortcut($source_exe, $dest_link) {
 	$Shortcut.Save()
 }
 
-Setup-Prerequisites
-Configure-User
-Configure-Host-Permissions
-Configure-Shortcuts
+if(Validate-Environment) {
+    Setup-Prerequisites
+    Configure-User
+    Configure-Host-Permissions
+    Configure-Shortcuts
+}
