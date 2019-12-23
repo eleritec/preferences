@@ -1,7 +1,11 @@
 function Setup-Prerequisites {
     # ensure WSL is enabled
     if(-Not (Is-WSL-Enabled)) {
-        choco install Microsoft-Windows-Subsystem-Linux -source WindowsFeatures -y
+        Enable-WindowsOptionalFeature -Online -FeatureName  Microsoft-Windows-Subsystem-Linux -NoRestart |Out-Null
+        if (Test-PendingReboot) {
+            $Boxstarter.RebootOk=$true
+            Invoke-Reboot
+        }
     }
 
     # utility packages
